@@ -131,6 +131,29 @@ Unten links das Hammer-Symbol prüfen – dort sollten die Moodle-Tools erschein
 
 ---
 
+## KI-Skill: Lernsituationen automatisch aufbauen
+
+Das Projekt enthält einen Claude-Skill in [`SKILL.md`](SKILL.md), der Claude anweist,
+aus einer handlungsorientierten Lernsituation automatisch einen vollständigen
+Moodle-Kursabschnitt zu erstellen – ohne Browser, ohne manuelle Klicks.
+
+**Trigger-Phrasen für Claude:**
+- "Erstelle einen Moodle-Kurs für diese Lernsituation"
+- "Baue den Kurs in Moodle auf"
+- "Lege die LS in Moodle an (Kurs-ID: ...)"
+
+Der Skill übernimmt dabei automatisch:
+- Abschnittsname + gestaltete Handlungssituations-Card
+- Alle 5 Handlungsphasen als farbkodierte Label-Header
+- Informationsblätter als Textseiten (mit Syntax-Highlighting für Code)
+- Externe Dokumentationslinks
+- Aufgaben mit PDF-Druckbutton und Abgabe-Hinweis
+
+Technische Details, HTML-Vorlagen und Entscheidungsregeln für den Aktivitätstyp
+sind vollständig in [`SKILL.md`](SKILL.md) dokumentiert.
+
+---
+
 ## Verwendung
 
 ### Kurs-ID herausfinden
