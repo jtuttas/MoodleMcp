@@ -250,3 +250,319 @@ moodle_create_label      -> Phase 5: Reflektieren (teal #00695C)
 moodle_create_assign     -> Reflexion [MIT PDF-Button]
 moodle_create_assign     -> Abschlusspraesentation summativ [MIT PDF-Button]
 ```
+
+---
+
+## Zeichen-Canvas fuer Schaltplaene
+
+Wenn SuS einen Schaltplan oder eine Skizze zeichnen sollen, NIEMALS einen leeren Kasten verwenden.
+Stattdessen immer diesen interaktiven Canvas einbauen:
+
+```html
+<!-- Zeichen-Canvas fuer Schaltplan / Skizze -->
+<h3 style="color:[PHASENFARBE];">Aufgabe X: Schaltplan skizzieren</h3>
+<p>[AUFGABENTEXT]</p>
+
+<div class="canvas-toolbar" style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+  <label style="font-size:0.85em;font-weight:600;color:#555;">Farbe:</label>
+  <input type="color" id="penColor" value="#000000" style="width:36px;height:30px;border:1px solid #ccc;border-radius:4px;cursor:pointer;padding:2px;">
+  <label style="font-size:0.85em;font-weight:600;color:#555;">Groesse:</label>
+  <input type="range" id="penSize" min="1" max="20" value="2" style="width:80px;">
+  <span id="penSizeLabel" style="font-size:0.85em;color:#555;">2px</span>
+  <button onclick="setEraser(false)" id="btnPen" style="padding:6px 12px;border:2px solid [PHASENFARBE];border-radius:6px;background:[PHASENFARBE];color:#fff;cursor:pointer;font-size:0.85em;">&#9998; Stift</button>
+  <button onclick="setEraser(true)" id="btnEraser" style="padding:6px 12px;border:2px solid #ccc;border-radius:6px;background:#fff;color:#333;cursor:pointer;font-size:0.85em;">&#9746; Radierer</button>
+  <button onclick="clearCanvas()" style="padding:6px 12px;border:2px solid #e53935;border-radius:6px;background:#fff;color:#e53935;cursor:pointer;font-size:0.85em;">&#128465; Leeren</button>
+  <button onclick="downloadCanvas()" style="padding:6px 12px;border:2px solid #2E7D32;border-radius:6px;background:#2E7D32;color:#fff;cursor:pointer;font-size:0.85em;">&#128229; Als PNG speichern</button>
+</div>
+<style>@media print { .canvas-toolbar { display:none !important; } }</style>
+
+<canvas id="schaltplanCanvas" width="800" height="300"
+  style="border:2px solid [PHASENFARBE];border-radius:8px;cursor:crosshair;background:#fff;width:100%;touch-action:none;display:block;">
+</canvas>
+
+<script>
+(function() {
+  const canvas = document.getElementById('schaltplanCanvas');
+  const ctx = canvas.getContext('2d');
+  let drawing = false, erasing = false, lastX = 0, lastY = 0;
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    if (e.touches) {
+      return { x: (e.touches[0].clientX - rect.left) * scaleX, y: (e.touches[0].clientY - rect.top) * scaleY };
+    }
+    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+  }
+
+  function startDraw(e) { e.preventDefault(); drawing = true; const p = getPos(e); lastX = p.x; lastY = p.y; }
+  function draw(e) {
+    e.preventDefault(); if (!drawing) return;
+    const p = getPos(e);
+    ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(p.x, p.y);
+    ctx.strokeStyle = erasing ? '#ffffff' : document.getElementById('penColor').value;
+    ctx.lineWidth = erasing ? document.getElementById('penSize').value * 4 : document.getElementById('penSize').value;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
+    lastX = p.x; lastY = p.y;
+  }
+  function stopDraw(e) { e.preventDefault(); drawing = false; }
+
+  canvas.addEventListener('mousedown', startDraw); canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDraw); canvas.addEventListener('mouseleave', stopDraw);
+  canvas.addEventListener('touchstart', startDraw, {passive:false}); canvas.addEventListener('touchmove', draw, {passive:false});
+  canvas.addEventListener('touchend', stopDraw, {passive:false});
+
+  document.getElementById('penSize').addEventListener('input', function() {
+    document.getElementById('penSizeLabel').textContent = this.value + 'px';
+  });
+
+  window.setEraser = function(val) {
+    erasing = val;
+    document.getElementById('btnPen').style.background = val ? '#fff' : '[PHASENFARBE]';
+    document.getElementById('btnPen').style.color = val ? '#333' : '#fff';
+    document.getElementById('btnEraser').style.background = val ? '[PHASENFARBE]' : '#fff';
+    document.getElementById('btnEraser').style.color = val ? '#fff' : '#333';
+  };
+  window.clearCanvas = function() { if (confirm('Zeichnung loeschen?')) ctx.clearRect(0, 0, canvas.width, canvas.height); };
+  window.downloadCanvas = function() { const l = document.createElement('a'); l.download = 'schaltplan.png'; l.href = canvas.toDataURL('image/png'); l.click(); };
+})();
+</script>
+
+<p style="font-size:0.85em;color:#666;margin-top:8px;">
+  &#128161; Tipp: Zeichne deinen Schaltplan direkt oben (auch per Touch/Stift auf Tablet),
+  oder skizziere ihn auf Papier und lade ein Foto hoch.
+  Mit "Als PNG speichern" kannst du die digitale Zeichnung als Datei herunterladen.
+</p>
+```
+
+Ersetze [PHASENFARBE] durch die Farbe der aktuellen Phase (z.B. #6A1B9A fuer Phase 2).
+
+---
+
+## Universeller Zeichen-Canvas
+
+Immer wenn SuS etwas zeichnen, skizzieren oder diagrammatisch darstellen sollen,
+NIEMALS einen leeren Kasten verwenden. Stattdessen diesen Canvas einsetzen.
+
+Einsatzbeispiele:
+- Schaltplan (Elektronik)
+- UML-Diagramm (Klassen, Sequenz, Use-Case)
+- Wireframe / Mockup (UI-Design)
+- Netzwerktopologie
+- Flussdiagramm / Ablaufplan
+- Mindmap
+- ER-Diagramm
+- Freihand-Skizze jeder Art
+
+Parameter zum Anpassen:
+- CANVAS_ID: eindeutige ID pro Seite (z.B. "schaltplan", "uml", "wireframe")
+- CANVAS_HOEHE: Hoehe in px (300 = Standard, 500 = gross, 200 = klein)
+- PHASENFARBE: Rahmenfarbe passend zur Phase
+- AUFGABENTEXT: Beschreibung was gezeichnet werden soll
+- DATEINAME: Dateiname beim Download (z.B. "schaltplan.png", "uml-diagramm.png")
+
+```html
+<!-- Universeller Zeichen-Canvas -->
+<h3 style="color:[PHASENFARBE];">Aufgabe X: [AUFGABENTEXT]</h3>
+
+<div id="toolbar_[CANVAS_ID]" style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+
+  <!-- Werkzeuge -->
+  <button onclick="setTool_[CANVAS_ID]('pen')" id="btn_pen_[CANVAS_ID]"
+    style="padding:6px 12px;border:2px solid [PHASENFARBE];border-radius:6px;background:[PHASENFARBE];color:#fff;cursor:pointer;font-size:0.85em;">
+    &#9998; Stift
+  </button>
+  <button onclick="setTool_[CANVAS_ID]('line')" id="btn_line_[CANVAS_ID]"
+    style="padding:6px 12px;border:2px solid #555;border-radius:6px;background:#fff;color:#333;cursor:pointer;font-size:0.85em;">
+    &#9135; Linie
+  </button>
+  <button onclick="setTool_[CANVAS_ID]('rect')" id="btn_rect_[CANVAS_ID]"
+    style="padding:6px 12px;border:2px solid #555;border-radius:6px;background:#fff;color:#333;cursor:pointer;font-size:0.85em;">
+    &#9645; Rechteck
+  </button>
+  <button onclick="setTool_[CANVAS_ID]('eraser')" id="btn_eraser_[CANVAS_ID]"
+    style="padding:6px 12px;border:2px solid #555;border-radius:6px;background:#fff;color:#333;cursor:pointer;font-size:0.85em;">
+    &#9746; Radierer
+  </button>
+
+  <!-- Trennlinie -->
+  <span style="color:#ccc;">|</span>
+
+  <!-- Farbe und Groesse -->
+  <label style="font-size:0.85em;font-weight:600;color:#555;">Farbe:</label>
+  <input type="color" id="color_[CANVAS_ID]" value="#000000"
+    style="width:32px;height:28px;border:1px solid #ccc;border-radius:4px;cursor:pointer;padding:2px;">
+
+  <label style="font-size:0.85em;font-weight:600;color:#555;">Groesse:</label>
+  <input type="range" id="size_[CANVAS_ID]" min="1" max="20" value="2" style="width:70px;">
+  <span id="sizelabel_[CANVAS_ID]" style="font-size:0.85em;color:#555;">2px</span>
+
+  <!-- Trennlinie -->
+  <span style="color:#ccc;">|</span>
+
+  <!-- Aktionen -->
+  <button onclick="undoCanvas_[CANVAS_ID]()"
+    style="padding:6px 12px;border:2px solid #1565C0;border-radius:6px;background:#fff;color:#1565C0;cursor:pointer;font-size:0.85em;">
+    &#8617; Undo
+  </button>
+  <button onclick="clearCanvas_[CANVAS_ID]()"
+    style="padding:6px 12px;border:2px solid #e53935;border-radius:6px;background:#fff;color:#e53935;cursor:pointer;font-size:0.85em;">
+    &#128465; Leeren
+  </button>
+  <button onclick="downloadCanvas_[CANVAS_ID]()"
+    style="padding:6px 12px;border:2px solid #2E7D32;border-radius:6px;background:#2E7D32;color:#fff;cursor:pointer;font-size:0.85em;">
+    &#128229; Als PNG speichern
+  </button>
+
+</div>
+<style>@media print { #toolbar_[CANVAS_ID] { display:none !important; } }</style>
+
+<canvas id="canvas_[CANVAS_ID]" width="900" height="[CANVAS_HOEHE]"
+  style="border:2px solid [PHASENFARBE];border-radius:8px;cursor:crosshair;background:#fff;width:100%;touch-action:none;display:block;">
+</canvas>
+
+<script>
+(function() {
+  const canvas = document.getElementById('canvas_[CANVAS_ID]');
+  const ctx = canvas.getContext('2d');
+  const FARBE = '[PHASENFARBE]';
+  let tool = 'pen';
+  let drawing = false;
+  let startX = 0, startY = 0, lastX = 0, lastY = 0;
+  let history = [];
+  let snapshot = null;
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const sx = canvas.width / rect.width;
+    const sy = canvas.height / rect.height;
+    const src = e.touches ? e.touches[0] : e;
+    return { x: (src.clientX - rect.left) * sx, y: (src.clientY - rect.top) * sy };
+  }
+
+  function saveHistory() {
+    history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+    if (history.length > 30) history.shift();
+  }
+
+  function startDraw(e) {
+    e.preventDefault();
+    drawing = true;
+    const p = getPos(e);
+    startX = lastX = p.x;
+    startY = lastY = p.y;
+    saveHistory();
+    if (tool === 'line' || tool === 'rect') {
+      snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  function draw(e) {
+    e.preventDefault();
+    if (!drawing) return;
+    const p = getPos(e);
+    const color = document.getElementById('color_[CANVAS_ID]').value;
+    const size = parseInt(document.getElementById('size_[CANVAS_ID]').value);
+
+    if (tool === 'pen') {
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(p.x, p.y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = size;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+      lastX = p.x; lastY = p.y;
+    } else if (tool === 'eraser') {
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(p.x, p.y);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = size * 4;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+      lastX = p.x; lastY = p.y;
+    } else if (tool === 'line') {
+      ctx.putImageData(snapshot, 0, 0);
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(p.x, p.y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = size;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    } else if (tool === 'rect') {
+      ctx.putImageData(snapshot, 0, 0);
+      ctx.beginPath();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = size;
+      ctx.strokeRect(startX, startY, p.x - startX, p.y - startY);
+    }
+  }
+
+  function stopDraw(e) { e.preventDefault(); drawing = false; snapshot = null; }
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDraw);
+  canvas.addEventListener('mouseleave', stopDraw);
+  canvas.addEventListener('touchstart', startDraw, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('touchend', stopDraw, { passive: false });
+
+  document.getElementById('size_[CANVAS_ID]').addEventListener('input', function() {
+    document.getElementById('sizelabel_[CANVAS_ID]').textContent = this.value + 'px';
+  });
+
+  function updateButtons(active) {
+    ['pen','line','rect','eraser'].forEach(function(t) {
+      const btn = document.getElementById('btn_' + t + '_[CANVAS_ID]');
+      if (!btn) return;
+      btn.style.background = (t === active) ? FARBE : '#fff';
+      btn.style.color = (t === active) ? '#fff' : '#333';
+      btn.style.borderColor = (t === active) ? FARBE : '#555';
+    });
+    canvas.style.cursor = (active === 'eraser') ? 'cell' : 'crosshair';
+  }
+
+  window['setTool_[CANVAS_ID]'] = function(t) { tool = t; updateButtons(t); };
+  window['undoCanvas_[CANVAS_ID]'] = function() {
+    if (history.length > 0) ctx.putImageData(history.pop(), 0, 0);
+  };
+  window['clearCanvas_[CANVAS_ID]'] = function() {
+    if (confirm('Zeichnung loeschen?')) {
+      saveHistory();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  };
+  window['downloadCanvas_[CANVAS_ID]'] = function() {
+    const link = document.createElement('a');
+    link.download = '[DATEINAME]';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+
+  updateButtons('pen');
+})();
+</script>
+
+<p style="font-size:0.85em;color:#666;margin-top:8px;">
+  &#128161; Tipp: Nutze Stift zum Freihand-Zeichnen, Linie und Rechteck fuer praezise Formen.
+  Mit "Undo" kannst du den letzten Schritt rueckgaengig machen (bis zu 30 Schritte).
+  Mit "Als PNG speichern" laedt die Zeichnung als Datei herunter – diese dann in Moodle hochladen.
+  Alternativ: Skizze auf Papier, Foto machen und hochladen.
+</p>
+```
+
+Werkzeuge des Canvas:
+- Stift: Freihand-Zeichnen (fuer organische Formen, Skizzen)
+- Linie: Gerade Verbindungslinie (fuer Schaltplaene, UML-Verbindungen)
+- Rechteck: Knoeten, Bloecke, Komponenten (fuer UML, ER, Wireframes)
+- Radierer: Korrekturen (4x Stiftgroesse)
+- Undo: Bis zu 30 Schritte zurueck
+- PNG speichern: Download der fertigen Zeichnung zur Abgabe
+
+Mehrere Canvas auf einer Seite: Jeder Canvas braucht eine eindeutige CANVAS_ID!
+Z.B. "diagramm1", "diagramm2" – alle window-Funktionen sind dann automatisch getrennt.
