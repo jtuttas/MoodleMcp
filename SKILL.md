@@ -184,34 +184,51 @@ Verfuegbare Sprachen: cpp, python, javascript, java, bash, ini, json, html, css,
 
 Fuer Seiten OHNE Code: highlight.js weglassen, nur den div-Container verwenden.
 
-### Aufgabe mit PDF-Button (fuer moodle_create_assign description)
+### Aufgabe: Formular mit PDF-Druckbutton (fuer moodle_create_assign description)
 
-PFLICHT: Jede Aufgabe bekommt PDF-Banner oben und Abgabe-Hinweis unten.
+**PFLICHTREGELN – IMMER einhalten:**
+
+1. **KEIN Download-Button** fuer externe Arbeitsblätter. Niemals `@@PLUGINFILE@@`, `href=...pdf` oder aehnliche Download-Links verwenden.
+2. **ALLE Aufgabeninhalte** werden als ausfuellbares HTML-Formular direkt in der Aufgabenbeschreibung abgebildet (input, textarea, checkbox, radio).
+3. **PDF-Button via window.print()** – PFLICHT am Anfang jeder Aufgabe. Schueler füllen das Formular aus und drucken es dann als PDF.
+4. **Print-CSS** mit `@media print { .no-print { display:none!important; } }` sicherstellen, damit der Button beim Drucken verschwindet.
+5. **Abgabe-Hinweis** am Ende: Schueler drucken als PDF → laden PDF ueber "Einreichen" hoch.
 
 ```html
 <div style="font-family:Arial,sans-serif;padding:20px;">
+<style>@media print { .no-print { display:none !important; } }</style>
 
-  <div style="background:linear-gradient(135deg,#1a237e,#283593);border-radius:10px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+  <!-- PFLICHT: Blauer Aufgaben-Header -->
+  <div style="background:linear-gradient(135deg,#1a237e,#283593);border-radius:10px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
     <div style="display:flex;align-items:center;gap:12px;">
       <span style="font-size:1.8em;">&#128221;</span>
       <div>
-        <div style="color:#fff;font-weight:700;font-size:1em;">Arbeitsblatt zum Ausdrucken oder digital ausfuellen</div>
-        <div style="color:rgba(255,255,255,0.8);font-size:0.85em;margin-top:2px;">Fuelle das Blatt aus und lade es als PDF oder Foto ueber "Einreichen" hoch.</div>
+        <div style="color:rgba(255,255,255,0.75);font-size:0.75em;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">Phase [NR] – [PHASENNAME]</div>
+        <div style="color:#fff;font-size:1.1em;font-weight:700;">[AUFGABENTITEL]</div>
       </div>
     </div>
-    <button onclick="window.print()" style="background:#fff;color:#1a237e;border:none;border-radius:8px;padding:10px 20px;font-weight:700;font-size:0.95em;cursor:pointer;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.2);">&#128438; Als PDF speichern</button>
-  </div>
-  <style>@media print { button, .no-print { display:none !important; } }</style>
-
-  <div style="background:[PHASENFARBE_HELL];border-left:4px solid [PHASENFARBE];padding:16px;border-radius:4px;margin-bottom:24px;">
-    <strong>Arbeitsauftrag:</strong> [AUFGABENSTELLUNG AUS DER LERNSITUATION]
+    <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:10px 16px;color:#fff;font-size:0.85em;text-align:center;">&#9203; ca. [ZEIT] Min.<br><strong>[SOZIALFORM]</strong></div>
   </div>
 
-  [AUFGABEN_INHALT]
+  <!-- PFLICHT: PDF-Druckbutton -->
+  <div class="no-print" style="background:linear-gradient(135deg,#2E7D32,#388E3C);border-radius:10px;padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:1.5em;">&#128438;</span>
+      <div style="color:#fff;">
+        <div style="font-weight:700;font-size:1em;">Formular ausf&#252;llen &amp; als PDF speichern</div>
+        <div style="font-size:0.8em;opacity:0.85;">F&#252;lle alle Felder aus, dann klicke den Button → "Als PDF speichern" w&#228;hlen → hochladen</div>
+      </div>
+    </div>
+    <button onclick="window.print()" style="background:#fff;color:#2E7D32;border:none;border-radius:8px;padding:10px 22px;font-weight:700;font-size:0.95em;cursor:pointer;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.2);">&#128438; Als PDF speichern</button>
+  </div>
 
-  <div style="background:#E8F5E9;border-left:4px solid #2E7D32;padding:14px 16px;border-radius:4px;margin-top:20px;">
+  <!-- AUFGABENINHALT: Formularfelder -->
+  [AUFGABEN_INHALT_MIT_FORMULARFELDERN]
+
+  <!-- PFLICHT: Abgabe-Hinweis -->
+  <div class="no-print" style="background:#E8F5E9;border-left:4px solid #2E7D32;padding:14px 16px;border-radius:4px;margin-top:20px;">
     <strong style="color:#2E7D32;">&#128229; Abgabe:</strong>
-    <span style="color:#333;"> Klicke auf "Als PDF speichern" (oben), oder mache ein Foto deiner handschriftlichen Loesung. Lade die Datei anschliessend ueber "Einreichen" hoch.</span>
+    <span style="color:#333;"> F&#252;lle alle Felder aus → klicke "Als PDF speichern" → w&#228;hle im Druckdialog "Als PDF speichern" → lade die Datei &#252;ber "Einreichen" hoch.</span>
   </div>
 
 </div>
