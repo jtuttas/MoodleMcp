@@ -5,7 +5,10 @@ KI-gestützter Moodle-Kursaufbau via Claude Desktop und MCP.
 Claude Desktop spricht direkt mit der Moodle REST API und kann Kursabschnitte,
 Textseiten, Labels, Aufgaben und externe Links anlegen und bearbeiten.
 
-Zusätzlich unterstützt der Server das Setzen von **Abschlussverfolgung** und
+Zusätzlich kann der Server lokal erzeugte Dateien (z.B. PDF/DOCX/XLSX) als
+"Zusätzliche Dateien" direkt in Moodle-Aufgaben hochladen.
+
+Außerdem unterstützt der Server das Setzen von **Abschlussverfolgung** und
 **Voraussetzungen/Verfügbarkeit** (Aktivität ist gesperrt, bis andere Aktivitäten
 abgeschlossen sind).
 
@@ -37,6 +40,7 @@ Claude Desktop (stdio)
 Das Plugin `local_aicoursecreator` stellt die benötigten Webservice-Funktionen bereit.
 
 1. `local_aicoursecreator.zip` herunterladen
+   (im Repository liegt die ZIP unter `Plugin/local_aicoursecreator.zip`)
 2. In Moodle: **Website-Administration → Plugins → Plugin installieren**
 3. ZIP hochladen und Upgrade bestätigen
 
@@ -132,8 +136,17 @@ Unten links das Hammer-Symbol prüfen – dort sollten die Moodle-Tools erschein
 | `moodle_update_url` | Externen Link bearbeiten |
 | `moodle_create_assign` | Aufgabe anlegen |
 | `moodle_update_assign` | Aufgabe bearbeiten |
+| `moodle_upload_assignfile` | Datei als "Zusätzliche Datei" in eine Aufgabe hochladen |
 | `moodle_set_completion` | Abschlussverfolgung für eine Aktivität konfigurieren |
 | `moodle_set_restriction` | Aktivität sperren, bis andere Aktivitäten abgeschlossen sind |
+
+### Sichtbarkeit (optional)
+
+Viele Create/Update-Tools unterstützen den Parameter `visible`:
+
+- `1` = sichtbar
+- `0` = versteckt
+- bei Update-Tools zusätzlich: `-1` = nicht ändern (Standard)
 
 ---
 
@@ -195,6 +208,10 @@ https://moodle.example.de/moodle/course/view.php?id=42
 **Aktivität sperren bis andere abgeschlossen sind:**
 > "Sperre in Kurs 42 die Textseite 'Implementierung' bis die Aufgabe 'Konzept-Abgabe' abgeschlossen ist. Zeige die gesperrte Aktivität ausgegraut an."
 
+**Datei in eine Aufgabe hochladen:**
+> "Lies die Module in Abschnitt 2 von Kurs 42, finde die Aufgabe 'Arbeitsblatt' und lade die Datei `C:\\temp\\Arbeitsblatt.pdf` als zusätzliche Datei in diese Aufgabe hoch."
+> Hinweis: Für `moodle_upload_assignfile` muss der Pfad absolut sein und die Datei lokal existieren (Claude kann die Datei vorher lokal generieren).
+
 ---
 
 ## Bekannte Einschränkungen
@@ -224,27 +241,10 @@ Die `sectionnum` ist immer 0-basiert (Abschnitt 0 = allgemeiner Bereich).
 ```
 moodle-mcp/
 ├── moodle-mcp.js                  <- Lokaler MCP stdio Server
-└── local_aicoursecreator/         <- Moodle Plugin
-    ├── version.php
-    ├── lib.php
-    ├── db/
-    │   └── services.php           <- Webservice-Definitionen
-    ├── lang/en/
-    │   └── local_aicoursecreator.php
-    └── classes/external/
-        ├── get_sections.php
-        ├── get_modules.php
-        ├── update_section.php
-        ├── create_label.php
-        ├── update_label.php
-        ├── create_page.php
-        ├── update_page.php
-        ├── create_url.php
-        ├── update_url.php
-        ├── create_assign.php
-        ├── update_assign.php
-        ├── set_completion.php
-        └── set_restriction.php
+├── README.md
+├── SKILL.md                       <- Claude Skill (Lernsituationen automatisch aufbauen)
+└── Plugin/
+    └── local_aicoursecreator.zip  <- Moodle Plugin (Webservice-Funktionen)
 ```
 
 ---

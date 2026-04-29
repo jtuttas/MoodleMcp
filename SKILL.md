@@ -796,3 +796,121 @@ Die Kette bezieht sich nur auf Aufgaben (assign) und ggf. Textseiten (page).
   keine Abschlussverfolgung hat (completion=0)
 - Bei mehreren Voraussetzungen (require_cmids=[1001, 1002]) muessen
   ALLE genannten cmids zuvor mit set_completion konfiguriert worden sein
+
+---
+
+## Zusaetzliche Dateien zu Aufgaben hinzufuegen (optionales Feature)
+
+Aufgaben in Moodle koennen neben der HTML-Beschreibung auch echte Dateien
+als "Zusaetzliche Dateien" enthalten – z.B. ein DOCX-Arbeitsblatt zum Ausdrucken,
+eine PDF-Anleitung oder eine XLSX-Tabelle zum Ausfullen.
+
+### Wann Dateien sinnvoll sind
+
+| Dateiformat | Sinnvoll wenn... |
+|---|---|
+| DOCX | SuS sollen ein formatiertes Arbeitsblatt ausdrucken oder am PC ausfullen |
+| PDF | Fertige Anleitungen, Datenblatter, Schaltplaene als Referenz |
+| XLSX | Tabellen zum Ausfullen (z.B. Messprotokolle, Vergleichstabellen) |
+| PPTX | Praesentation als Vorlage fuer SuS |
+| PNG / JPG | Schaltplaene, Diagramme, Fotos als separate Datei |
+
+### Workflow: Datei generieren und hochladen
+
+IMMER in dieser Reihenfolge:
+
+```
+1. Aufgabe anlegen
+   cmid = moodle_create_assign(name="...", description="[HTML-Beschreibung]", ...)
+
+2. Datei lokal generieren (mit den jeweiligen Skills)
+   Beispiel DOCX: bash_tool → node anleitung.js → /tmp/arbeitsblatt.docx
+   Beispiel PDF:  bash_tool → python script.py → /tmp/protokoll.pdf
+   Beispiel XLSX: bash_tool → node tabelle.js  → /tmp/messtabelle.xlsx
+
+3. Datei hochladen
+   moodle_upload_assignfile(
+     cmid     = [cmid aus Schritt 1],
+     filepath = "/tmp/arbeitsblatt.docx"
+   )
+   → Dateiname und MIME-Type werden automatisch erkannt
+```
+
+### Unterstuetzte Dateiformate
+
+| Erweiterung | MIME-Type | Wird automatisch erkannt |
+|---|---|---|
+| .pdf | application/pdf | ✅ |
+| .docx | application/vnd.openxmlformats-... | ✅ |
+| .xlsx | application/vnd.openxmlformats-... | ✅ |
+| .pptx | application/vnd.openxmlformats-... | ✅ |
+| .html | text/html | ✅ |
+| .png | image/png | ✅ |
+| .jpg / .jpeg | image/jpeg | ✅ |
+| .svg | image/svg+xml | ✅ |
+| .csv | text/csv | ✅ |
+| .txt | text/plain | ✅ |
+| .zip | application/zip | ✅ |
+
+### Zusammenspiel HTML-Beschreibung und Dateianhang
+
+Die HTML-Beschreibung der Aufgabe und die Datei ergaenzen sich:
+
+```
+Aufgaben-Beschreibung (HTML):
+  → Aufgabenstellung, Anforderungen, Abgabe-Hinweis, PDF-Button
+  → Alles was SuS direkt in Moodle sehen
+
+Zusaetzliche Datei (DOCX/PDF/...):
+  → Ausfuellbares Arbeitsblatt zum Herunterladen
+  → Formatierte Vorlage die SuS ausdrucken oder am PC bearbeiten
+  → Referenzmaterial (Datenblatt, Schaltplan als hochwertiges PDF)
+```
+
+NICHT doppeln: Wenn der Inhalt bereits vollstaendig in der HTML-Beschreibung steht
+(z.B. mit Canvas, Eingabefeldern, Checkboxen), braucht es KEINE zusaetzliche Datei.
+Dateien nur hinzufuegen wenn sie einen echten Mehrwert bieten.
+
+### Benutzer fragen ob Dateianhang gewuenscht
+
+Vor dem Generieren einer Datei den Benutzer kurz fragen:
+
+> "Soll ich zusaetzlich ein ausfuellbares DOCX-Arbeitsblatt als Dateianhang
+> zur Aufgabe hinzufuegen, das SuS herunterladen und ausdrucken koennen?"
+
+Nur wenn ja: Datei generieren und hochladen.
+
+### Beispiel: Aufgabe mit DOCX-Arbeitsblatt
+
+```
+// 1. Aufgabe anlegen
+cmid = moodle_create_assign(
+  name        = "Arbeitsblatt: Frequenzberechnung",
+  description = "[HTML mit PDF-Button und Eingabefeldern]",
+  courseid    = 86,
+  sectionnum  = 3,
+  maxfiles    = 3
+)
+
+// 2. DOCX generieren (mit docx-Skill)
+bash_tool: node generate_arbeitsblatt.js → /tmp/frequenzberechnung.docx
+
+// 3. Hochladen
+moodle_upload_assignfile(
+  cmid     = [cmid],
+  filepath = "/tmp/frequenzberechnung.docx"
+)
+```
+
+### Hinweis bei mehreren Dateien
+
+Mehrere Dateien koennen nacheinander hochgeladen werden –
+jeder `moodle_upload_assignfile`-Aufruf fuegt eine weitere Datei hinzu.
+Gleicher Dateiname ueberschreibt die vorhandene Datei (idempotent).
+
+```
+moodle_upload_assignfile(cmid=1001, filepath="/tmp/arbeitsblatt.docx")
+moodle_upload_assignfile(cmid=1001, filepath="/tmp/schaltplan.pdf")
+moodle_upload_assignfile(cmid=1001, filepath="/tmp/messtabelle.xlsx")
+// → Aufgabe hat jetzt 3 Dateianhange
+```
