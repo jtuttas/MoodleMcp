@@ -184,51 +184,34 @@ Verfuegbare Sprachen: cpp, python, javascript, java, bash, ini, json, html, css,
 
 Fuer Seiten OHNE Code: highlight.js weglassen, nur den div-Container verwenden.
 
-### Aufgabe: Formular mit PDF-Druckbutton (fuer moodle_create_assign description)
+### Aufgabe mit PDF-Button (fuer moodle_create_assign description)
 
-**PFLICHTREGELN – IMMER einhalten:**
-
-1. **KEIN Download-Button** fuer externe Arbeitsblätter. Niemals `@@PLUGINFILE@@`, `href=...pdf` oder aehnliche Download-Links verwenden.
-2. **ALLE Aufgabeninhalte** werden als ausfuellbares HTML-Formular direkt in der Aufgabenbeschreibung abgebildet (input, textarea, checkbox, radio).
-3. **PDF-Button via window.print()** – PFLICHT am Anfang jeder Aufgabe. Schueler füllen das Formular aus und drucken es dann als PDF.
-4. **Print-CSS** mit `@media print { .no-print { display:none!important; } }` sicherstellen, damit der Button beim Drucken verschwindet.
-5. **Abgabe-Hinweis** am Ende: Schueler drucken als PDF → laden PDF ueber "Einreichen" hoch.
+PFLICHT: Jede Aufgabe bekommt PDF-Banner oben und Abgabe-Hinweis unten.
 
 ```html
 <div style="font-family:Arial,sans-serif;padding:20px;">
-<style>@media print { .no-print { display:none !important; } }</style>
 
-  <!-- PFLICHT: Blauer Aufgaben-Header -->
-  <div style="background:linear-gradient(135deg,#1a237e,#283593);border-radius:10px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+  <div style="background:linear-gradient(135deg,#1a237e,#283593);border-radius:10px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
     <div style="display:flex;align-items:center;gap:12px;">
       <span style="font-size:1.8em;">&#128221;</span>
       <div>
-        <div style="color:rgba(255,255,255,0.75);font-size:0.75em;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">Phase [NR] – [PHASENNAME]</div>
-        <div style="color:#fff;font-size:1.1em;font-weight:700;">[AUFGABENTITEL]</div>
+        <div style="color:#fff;font-weight:700;font-size:1em;">Arbeitsblatt zum Ausdrucken oder digital ausfuellen</div>
+        <div style="color:rgba(255,255,255,0.8);font-size:0.85em;margin-top:2px;">Fuelle das Blatt aus und lade es als PDF oder Foto ueber "Einreichen" hoch.</div>
       </div>
     </div>
-    <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:10px 16px;color:#fff;font-size:0.85em;text-align:center;">&#9203; ca. [ZEIT] Min.<br><strong>[SOZIALFORM]</strong></div>
+    <button onclick="window.print()" style="background:#fff;color:#1a237e;border:none;border-radius:8px;padding:10px 20px;font-weight:700;font-size:0.95em;cursor:pointer;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.2);">&#128438; Als PDF speichern</button>
+  </div>
+  <style>@media print { button, .no-print { display:none !important; } }</style>
+
+  <div style="background:[PHASENFARBE_HELL];border-left:4px solid [PHASENFARBE];padding:16px;border-radius:4px;margin-bottom:24px;">
+    <strong>Arbeitsauftrag:</strong> [AUFGABENSTELLUNG AUS DER LERNSITUATION]
   </div>
 
-  <!-- PFLICHT: PDF-Druckbutton -->
-  <div class="no-print" style="background:linear-gradient(135deg,#2E7D32,#388E3C);border-radius:10px;padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <span style="font-size:1.5em;">&#128438;</span>
-      <div style="color:#fff;">
-        <div style="font-weight:700;font-size:1em;">Formular ausf&#252;llen &amp; als PDF speichern</div>
-        <div style="font-size:0.8em;opacity:0.85;">F&#252;lle alle Felder aus, dann klicke den Button → "Als PDF speichern" w&#228;hlen → hochladen</div>
-      </div>
-    </div>
-    <button onclick="window.print()" style="background:#fff;color:#2E7D32;border:none;border-radius:8px;padding:10px 22px;font-weight:700;font-size:0.95em;cursor:pointer;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.2);">&#128438; Als PDF speichern</button>
-  </div>
+  [AUFGABEN_INHALT]
 
-  <!-- AUFGABENINHALT: Formularfelder -->
-  [AUFGABEN_INHALT_MIT_FORMULARFELDERN]
-
-  <!-- PFLICHT: Abgabe-Hinweis -->
-  <div class="no-print" style="background:#E8F5E9;border-left:4px solid #2E7D32;padding:14px 16px;border-radius:4px;margin-top:20px;">
+  <div style="background:#E8F5E9;border-left:4px solid #2E7D32;padding:14px 16px;border-radius:4px;margin-top:20px;">
     <strong style="color:#2E7D32;">&#128229; Abgabe:</strong>
-    <span style="color:#333;"> F&#252;lle alle Felder aus → klicke "Als PDF speichern" → w&#228;hle im Druckdialog "Als PDF speichern" → lade die Datei &#252;ber "Einreichen" hoch.</span>
+    <span style="color:#333;"> Klicke auf "Als PDF speichern" (oben), oder mache ein Foto deiner handschriftlichen Loesung. Lade die Datei anschliessend ueber "Einreichen" hoch.</span>
   </div>
 
 </div>
@@ -714,3 +697,102 @@ Faustregel: viewBox mindestens 20px Rand auf jeder Seite:
 - [ ] Textlabels ueberschneiden keine Boxen oder andere Texte?
 - [ ] Titel ausserhalb aller anderen Elemente?
 - [ ] viewBox hat ausreichend Rand (mind. 20px)?
+
+---
+
+## Abschlussverfolgung (optionales Feature)
+
+Wenn der Benutzer Abschlussverfolgung wuenscht, den Benutzer zuerst fragen:
+
+> "Soll ich die Abschlussverfolgung aktivieren? Dann muessen SuS jede Aufgabe
+> einreichen bevor die naechste freigeschaltet wird."
+
+Falls ja: Den folgenden Workflow NACH dem Erstellen aller Aktivitaeten ausfuehren.
+
+### Welche Aktivitaeten bekommen Abschlussverfolgung?
+
+| Aktivitaetstyp | Completion-Typ | Erlaeuterung |
+|---|---|---|
+| `moodle_create_assign` | completion=2, completionsubmit=1 | Automatisch bei Einreichung |
+| `moodle_create_page` | completion=1 | Manuell (SuS klickt "Abgeschlossen") |
+| `moodle_create_url` | – | Keine Verfolgung (Links ueberspringen) |
+| `moodle_create_label` | – | Keine Verfolgung (Header ueberspringen) |
+
+### Pflicht-Reihenfolge beim Einrichten
+
+IMMER in dieser Reihenfolge vorgehen – niemals umgekehrt:
+
+```
+1. Alle Aktivitaeten erstellen (create_*)
+   → cmids aus den Antworten notieren
+
+2. Fuer jede zu verfolgende Aktivitaet set_completion aufrufen
+   → Erst wenn ALLE set_completion-Calls erfolgreich sind:
+
+3. Fuer jede abhaengige Aktivitaet set_restriction aufrufen
+   → require_cmids auf die VORHERIGE Aktivitaet zeigen lassen
+```
+
+### Beispiel-Workflow fuer 3 aufeinanderfolgende Aufgaben
+
+```
+// Schritt 1: Aktivitaeten anlegen, cmids merken
+cmid_A = moodle_create_assign(name="Phase 1 Arbeitsblatt", ...)   → z.B. 1001
+cmid_B = moodle_create_assign(name="Phase 2 Aufgabe", ...)        → z.B. 1002
+cmid_C = moodle_create_assign(name="Phase 3 Implementierung", ...) → z.B. 1003
+
+// Schritt 2: Abschluss aktivieren (alle drei)
+moodle_set_completion(cmid=1001, completion=2, completionsubmit=1)
+moodle_set_completion(cmid=1002, completion=2, completionsubmit=1)
+moodle_set_completion(cmid=1003, completion=2, completionsubmit=1)
+
+// Schritt 3: Voraussetzungen setzen (Kette)
+// B erst sichtbar wenn A abgeschlossen
+moodle_set_restriction(cmid=1002, require_cmids=[1001], show_locked=1)
+// C erst sichtbar wenn B abgeschlossen
+moodle_set_restriction(cmid=1003, require_cmids=[1002], show_locked=1)
+```
+
+### Textseiten in die Kette einbeziehen
+
+Wenn auch Textseiten (Informationsblaetter) abgeschlossen sein muessen:
+
+```
+cmid_info = moodle_create_page(name="Informationsblatt", ...)   → z.B. 1000
+cmid_task = moodle_create_assign(name="Aufgabe", ...)           → z.B. 1001
+
+// Informationsblatt: manueller Abschluss
+moodle_set_completion(cmid=1000, completion=1)
+
+// Aufgabe: automatisch bei Einreichung
+moodle_set_completion(cmid=1001, completion=2, completionsubmit=1)
+
+// Aufgabe erst freischalten wenn Informationsblatt gelesen (manuell abgeschlossen)
+moodle_set_restriction(cmid=1001, require_cmids=[1000], show_locked=1)
+```
+
+### show_locked – Darstellung gesperrter Aktivitaeten
+
+| Wert | Darstellung in Moodle |
+|---|---|
+| 1 (Standard) | Aktivitaet ausgegraut mit Schloss-Symbol und Hinweis sichtbar |
+| 0 | Aktivitaet komplett unsichtbar bis Voraussetzung erfuellt |
+
+Empfehlung: show_locked=1 verwenden damit SuS wissen was sie als naechstes erwartet.
+
+### Labels und URLs NICHT in die Kette einbeziehen
+
+Phasen-Header (Labels) und externe Links (URLs) bekommen KEINE Abschlussverfolgung
+und KEINE Voraussetzungen. Sie bleiben immer sichtbar.
+
+Die Kette bezieht sich nur auf Aufgaben (assign) und ggf. Textseiten (page).
+
+### Fehlervermeidung
+
+- NIEMALS set_restriction aufrufen bevor set_completion auf der
+  Voraussetzungs-Aktivitaet gesetzt wurde – sonst funktioniert die
+  Freischaltung nicht korrekt
+- NIEMALS eine Aktivitaet als Voraussetzung eintragen die selbst
+  keine Abschlussverfolgung hat (completion=0)
+- Bei mehreren Voraussetzungen (require_cmids=[1001, 1002]) muessen
+  ALLE genannten cmids zuvor mit set_completion konfiguriert worden sein

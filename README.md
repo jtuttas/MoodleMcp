@@ -5,6 +5,10 @@ KI-gestützter Moodle-Kursaufbau via Claude Desktop und MCP.
 Claude Desktop spricht direkt mit der Moodle REST API und kann Kursabschnitte,
 Textseiten, Labels, Aufgaben und externe Links anlegen und bearbeiten.
 
+Zusätzlich unterstützt der Server das Setzen von **Abschlussverfolgung** und
+**Voraussetzungen/Verfügbarkeit** (Aktivität ist gesperrt, bis andere Aktivitäten
+abgeschlossen sind).
+
 ```
 Claude Desktop (stdio)
        |
@@ -128,6 +132,8 @@ Unten links das Hammer-Symbol prüfen – dort sollten die Moodle-Tools erschein
 | `moodle_update_url` | Externen Link bearbeiten |
 | `moodle_create_assign` | Aufgabe anlegen |
 | `moodle_update_assign` | Aufgabe bearbeiten |
+| `moodle_set_completion` | Abschlussverfolgung für eine Aktivität konfigurieren |
+| `moodle_set_restriction` | Aktivität sperren, bis andere Aktivitäten abgeschlossen sind |
 
 ---
 
@@ -183,6 +189,12 @@ https://moodle.example.de/moodle/course/view.php?id=42
 > "Lies die Module in Abschnitt 1 von Kurs 42 und ändere den Inhalt der
 > Textseite 'Informationsblatt' auf einen aktualisierten Text."
 
+**Abschlussverfolgung aktivieren (für Voraussetzungen):**
+> "Lies die Module in Abschnitt 2 von Kurs 42. Aktiviere für die Aufgabe 'Arbeitsblatt' die Abschlussverfolgung: automatisch bei Einreichung."
+
+**Aktivität sperren bis andere abgeschlossen sind:**
+> "Sperre in Kurs 42 die Textseite 'Implementierung' bis die Aufgabe 'Konzept-Abgabe' abgeschlossen ist. Zeige die gesperrte Aktivität ausgegraut an."
+
 ---
 
 ## Bekannte Einschränkungen
@@ -196,6 +208,10 @@ Emojis problemlos als HTML-Entities, z.B. `&#127757;` statt 🌍.
 `update_section` setzt Sichtbarkeit auf Abschnittsebene. Die Sichtbarkeit einzelner
 Aktivitäten wird über den `visible`-Parameter der jeweiligen Create/Update-Funktion
 gesteuert.
+
+**Voraussetzungen / Abschlussverfolgung**
+Damit Voraussetzungen über abgeschlossene Aktivitäten funktionieren, muss in Moodle
+die Abschlussverfolgung im Kurs (bzw. systemweit) aktiviert sein.
 
 **Kursformat**
 Das Plugin funktioniert mit allen Moodle-Kursformaten (Topics, Weekly usw.).
@@ -226,7 +242,9 @@ moodle-mcp/
         ├── create_url.php
         ├── update_url.php
         ├── create_assign.php
-        └── update_assign.php
+        ├── update_assign.php
+        ├── set_completion.php
+        └── set_restriction.php
 ```
 
 ---
