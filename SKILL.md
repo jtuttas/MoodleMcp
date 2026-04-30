@@ -441,6 +441,31 @@ Mehrere Canvas auf einer Seite: Jede braucht eine eigene CANVAS_ID.
 - Codeseiten IMMER mit highlight.js: <pre><code class="language-XY">
 - Zeichenaufgaben IMMER mit Canvas, NIEMALS mit leerem Div
 
+### Mathematische Formeln (LaTeX / MathJax)
+
+Moodle rendert LaTeX-Formeln automatisch via MathJax. Formeln IMMER in LaTeX-Notation schreiben:
+
+| Darstellung | LaTeX |
+|---|---|
+| Inline-Formel | `\( f = \frac{1}{T} \)` |
+| Block-Formel (eigene Zeile) | `\[ f = \frac{1}{T} \]` |
+| Bruch | `\frac{Zaehler}{Nenner}` |
+| Index unten | `U_{GPIO}` |
+| Index oben | `cm^2` |
+| Multiplikationszeichen | `\times` |
+| Omega | `\Omega` |
+| Einheit mit Abstand | `220\,\Omega` oder `1\,\text{Hz}` |
+
+Beispiele aus der ESP32-Lernsituation:
+```
+\[ f = \frac{1}{T} \qquad T = 2 \times BLINK\_INTERVAL \qquad R = \frac{U_{GPIO} - U_{LED}}{I_{LED}} \]
+```
+```
+Die Periodendauer betr&auml;gt \( T = 100\,\text{ms} \), also gilt \( f = 10\,\text{Hz} \).
+```
+
+NIEMALS Formeln als Plain-Text schreiben (z.B. `f = 1/T` oder `U_GPIO`).
+
 ### Benennung von Labels und Aktivitaeten (KRITISCH)
 
 **Labels (Phasen-Header):** IMMER den `name`-Parameter setzen – er erscheint in der
