@@ -52,11 +52,12 @@ async function callMoodle(wsfunction, params = {}) {
 const TOOLS = [
   {
     name: "moodle_update_label",
-    description: "Ändert den HTML-Inhalt eines bestehenden Text- und Medienfelds (mod_label).",
+    description: "Ändert den HTML-Inhalt und/oder Namen eines bestehenden Text- und Medienfelds (mod_label).",
     inputSchema: {
       type: "object",
       properties: {
         cmid:    { type: "number", description: "Course Module ID des Labels" },
+        name:    { type: "string", description: "Anzeigename des Labels in der Kursverwaltung (leer = nicht ändern)" },
         content: { type: "string", description: "Neuer HTML-Inhalt" },
         visible: { type: "number", description: "1 = sichtbar, 0 = versteckt, -1 = nicht ändern", default: -1 },
       },
@@ -201,12 +202,13 @@ const TOOLS = [
   },
   {
     name: "moodle_create_label",
-    description: "Erstellt ein Text- und Medienfeld (mod_label) – wird direkt auf der Kursseite angezeigt, ohne eigenen Titel. Ideal für farbige Phasen-Header (Phase 1 Informieren, Phase 2 Planen usw.).",
+    description: "Erstellt ein Text- und Medienfeld (mod_label) – wird direkt auf der Kursseite angezeigt. Ideal für farbige Phasen-Header (Phase 1 Informieren, Phase 2 Planen usw.).",
     inputSchema: {
       type: "object",
       properties: {
         courseid:   { type: "number", description: "Kurs-ID" },
         sectionnum: { type: "number", description: "Abschnittsnummer (0-basiert)" },
+        name:       { type: "string", description: "Anzeigename in der Kursverwaltung, z.B. 'Phase 1 – Informieren & Analysieren'", default: "" },
         content:    { type: "string", description: "HTML-Inhalt des Labels (z.B. farbiger Phasen-Header)" },
         visible:    { type: "number", description: "1 = sichtbar (Standard), 0 = versteckt", default: 1 },
       },
@@ -257,6 +259,7 @@ async function executeTool(name, args) {
     case "moodle_update_label": {
       return await callMoodle("local_aicoursecreator_update_label", {
         cmid:    args.cmid,
+        name:    args.name ?? "",
         content: args.content || "",
         visible: args.visible ?? -1,
       });
@@ -393,6 +396,7 @@ async function executeTool(name, args) {
       return await callMoodle("local_aicoursecreator_create_label", {
         courseid:   args.courseid,
         sectionnum: args.sectionnum,
+        name:       args.name ?? "",
         content:    args.content,
         visible:    args.visible ?? 1,
       });
