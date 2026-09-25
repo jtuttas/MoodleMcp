@@ -51,6 +51,158 @@ async function callMoodle(wsfunction, params = {}) {
 // ─────────────────────────────────────────────────────────────
 const TOOLS = [
   {
+    name: "moodle_get_courses",
+    description: "Sucht und listet Moodle-Kurse, auf die der Webservice-Nutzer Zugriff hat. Hilfreich, wenn die Kurs-ID noch unbekannt ist.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        search: { type: "string", description: "Optionaler Suchtext für Kursname, Kurzname oder ID-Nummer", default: "" },
+        limit:  { type: "number", description: "Maximale Anzahl zurückgegebener Kurse (1-200)", default: 50 },
+      },
+    },
+  },
+  {
+    name: "moodle_create_section",
+    description: "Legt einen Kursabschnitt bis zur angegebenen Abschnittsnummer an und setzt optional Name, HTML-Beschreibung und Sichtbarkeit.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        courseid:   { type: "number", description: "Kurs-ID" },
+        sectionnum: { type: "number", description: "Abschnittsnummer (0-basiert)" },
+        name:       { type: "string", description: "Abschnittsname (optional)", default: "" },
+        summary:    { type: "string", description: "HTML-Inhalt der Abschnittsbeschreibung (optional)", default: "" },
+        visible:    { type: "number", description: "1 = sichtbar, 0 = versteckt", default: 1 },
+      },
+      required: ["courseid", "sectionnum"],
+    },
+  },
+  {
+    name: "moodle_set_module_visibility",
+    description: "Blendet eine bestehende Moodle-Aktivität anhand ihrer cmid ein oder aus.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        cmid:    { type: "number", description: "Course Module ID der Aktivität" },
+        visible: { type: "number", description: "1 = sichtbar, 0 = versteckt" },
+      },
+      required: ["cmid", "visible"],
+    },
+  },
+  {
+    name: "moodle_delete_module",
+    description: "Löscht eine bestehende Moodle-Aktivität anhand ihrer cmid. Vorher moodle_get_modules verwenden, um die richtige cmid zu prüfen.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        cmid: { type: "number", description: "Course Module ID der zu löschenden Aktivität" },
+      },
+      required: ["cmid"],
+    },
+  },
+  {
+    name: "moodle_get_question_categories",
+    description: "Listet die Fragenkategorien der Fragensammlung eines Kurses. Vor dem Import von Moodle-XML-Fragen verwenden.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        courseid: { type: "number", description: "Kurs-ID" },
+      },
+      required: ["courseid"],
+    },
+  },
+  {
+    name: "moodle_get_question_types",
+    description: "Listet die in Moodle installierten Fragetypen, die fuer Moodle-XML-Importe verwendet werden koennen, z.B. multichoice, cloze, ddwtos oder coderunner.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        courseid: { type: "number", description: "Kurs-ID fuer Berechtigungspruefung" },
+      },
+      required: ["courseid"],
+    },
+  },
+  {
+    name: "moodle_create_question_category",
+    description: "Erstellt eine Fragenkategorie in der Fragensammlung eines Kurses. Danach Moodle-XML-Fragen in diese Kategorie importieren.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        courseid: { type: "number", description: "Kurs-ID" },
+        name:     { type: "string", description: "Name der Fragenkategorie" },
+        info:     { type: "string", description: "Optionale HTML-Beschreibung", default: "" },
+        parentid: { type: "number", description: "Parent-Kategorie-ID, 0 = Kurs-Top-Kategorie", default: 0 },
+        idnumber: { type: "string", description: "Optionale ID-Nummer", default: "" },
+      },
+      required: ["courseid", "name"],
+    },
+  },
+  {
+    name: "moodle_import_questions_xml",
+    description: "Importiert Fragen im Moodle-XML-Format in eine Fragenkategorie. Erwartet vollstaendiges Moodle XML mit <quiz>-Root, <question>-Eintraegen, <name><text>...</text></name> und CDATA fuer HTML, kompatibel zu MoodleQuestionGenerator.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        courseid:   { type: "number", description: "Kurs-ID" },
+        categoryid: { type: "number", description: "Ziel-Fragenkategorie-ID" },
+        xml:        { type: "string", description: "Vollstaendiger Moodle-XML-Inhalt als String" },
+        xmlfile:    { type: "string", description: "Optional: Absoluter Pfad zu einer lokalen Moodle-XML-Datei. Wird verwendet, wenn xml leer ist." },
+        filename:   { type: "string", description: "Logischer Dateiname fuer den Moodle-Import", default: "questions.xml" },
+      },
+      required: ["courseid", "categoryid"],
+    },
+  },
+  {
+    name: "moodle_create_quiz",
+    description: "Erstellt ein Quiz (mod_quiz) in einem Kursabschnitt. Fragen werden danach mit moodle_add_quiz_questions hinzugefuegt.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        courseid:           { type: "number", description: "Kurs-ID" },
+        sectionnum:         { type: "number", description: "Abschnittsnummer (0-basiert)" },
+        name:               { type: "string", description: "Quiz-Titel" },
+        intro:              { type: "string", description: "HTML-Beschreibung des Quiz", default: "" },
+        grade:              { type: "number", description: "Maximalbewertung", default: 10 },
+        questionsperpage:   { type: "number", description: "Fragen pro Seite", default: 1 },
+        shuffleanswers:     { type: "number", description: "1 = Antworten mischen, 0 = nicht mischen", default: 1 },
+        preferredbehaviour: { type: "string", description: "Moodle-Frageverhalten, z.B. deferredfeedback", default: "deferredfeedback" },
+        visible:            { type: "number", description: "1 = sichtbar, 0 = versteckt", default: 1 },
+      },
+      required: ["courseid", "sectionnum", "name"],
+    },
+  },
+  {
+    name: "moodle_add_quiz_questions",
+    description: "Fuegt vorhandene Fragen aus der Fragensammlung anhand ihrer questionids einem Quiz hinzu. questionids kommen z.B. aus moodle_import_questions_xml.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        cmid:        { type: "number", description: "Course Module ID des Quiz" },
+        questionids: { type: "array", items: { type: "number" }, description: "Question IDs, die dem Quiz hinzugefuegt werden" },
+        maxmark:     { type: "number", description: "Punkte pro Frage", default: 1 },
+      },
+      required: ["cmid", "questionids"],
+    },
+  },
+  {
+    name: "moodle_update_quiz",
+    description: "Aktualisiert Eigenschaften eines bestehenden Quiz (Name, Intro, Zeitlimit, Versuche, Bewertungsmethode, Sichtbarkeit). Nur angegebene Felder werden geaendert.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        cmid:             { type: "number", description: "Course Module ID des Quiz" },
+        name:             { type: "string", description: "Neuer Quiz-Titel (leer = nicht aendern)", default: "" },
+        intro:            { type: "string", description: "Neue HTML-Beschreibung (leer = nicht aendern)", default: "" },
+        timelimit:        { type: "number", description: "Zeitlimit in Sekunden (0 = kein Limit, -1 = nicht aendern)", default: -1 },
+        attempts:         { type: "number", description: "Max. Versuche (0 = unbegrenzt, -1 = nicht aendern)", default: -1 },
+        grademethod:      { type: "number", description: "1=hoechste, 2=Durchschnitt, 3=erste, 4=letzte Bewertung (-1 = nicht aendern)", default: -1 },
+        visible:          { type: "number", description: "1 = sichtbar, 0 = versteckt, -1 = nicht aendern", default: -1 },
+        shuffleanswers:   { type: "number", description: "1 = mischen, 0 = nicht mischen, -1 = nicht aendern", default: -1 },
+        questionsperpage: { type: "number", description: "Fragen pro Seite (-1 = nicht aendern)", default: -1 },
+      },
+      required: ["cmid"],
+    },
+  },
+  {
     name: "moodle_update_label",
     description: "Ändert den HTML-Inhalt und/oder Namen eines bestehenden Text- und Medienfelds (mod_label).",
     inputSchema: {
@@ -89,6 +241,39 @@ const TOOLS = [
         sectionnum: { type: "number", description: "Abschnittsnummer (0-basiert, -1 = alle Abschnitte)", default: -1 },
       },
       required: ["courseid"],
+    },
+  },
+  {
+    name: "moodle_get_assign_content",
+    description: "Liest die unveränderte gespeicherte HTML-Beschreibung und Metadaten einer bestehenden Moodle-Aufgabe anhand ihrer cmid. Rein lesend; verändert keine Moodle-Daten.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        cmid: { type: "number", description: "Course Module ID der Aufgabe" },
+      },
+      required: ["cmid"],
+    },
+  },
+  {
+    name: "moodle_get_label_content",
+    description: "Liest den unveränderten gespeicherten HTML-Inhalt und die Metadaten eines bestehenden Text- und Medienfelds anhand seiner cmid. Rein lesend; verändert keine Moodle-Daten.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        cmid: { type: "number", description: "Course Module ID des Text- und Medienfelds" },
+      },
+      required: ["cmid"],
+    },
+  },
+  {
+    name: "moodle_get_page_content",
+    description: "Liest den unveränderten gespeicherten HTML-Inhalt und die Metadaten einer bestehenden Moodle-Textseite anhand ihrer cmid. Rein lesend; verändert keine Moodle-Daten.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        cmid: { type: "number", description: "Course Module ID der Textseite" },
+      },
+      required: ["cmid"],
     },
   },
   {
@@ -255,6 +440,115 @@ const TOOLS = [
 // ─────────────────────────────────────────────────────────────
 async function executeTool(name, args) {
   switch (name) {
+    case "moodle_get_courses": {
+      return await callMoodle("local_aicoursecreator_get_courses", {
+        search: args.search || "",
+        limit:  args.limit  ?? 50,
+      });
+    }
+
+    case "moodle_create_section": {
+      return await callMoodle("local_aicoursecreator_create_section", {
+        courseid:   args.courseid,
+        sectionnum: args.sectionnum,
+        name:       args.name    || "",
+        summary:    args.summary || "",
+        visible:    args.visible ?? 1,
+      });
+    }
+
+    case "moodle_set_module_visibility": {
+      return await callMoodle("local_aicoursecreator_set_module_visibility", {
+        cmid:    args.cmid,
+        visible: args.visible,
+      });
+    }
+
+    case "moodle_delete_module": {
+      return await callMoodle("local_aicoursecreator_delete_module", {
+        cmid: args.cmid,
+      });
+    }
+
+    case "moodle_get_question_categories": {
+      return await callMoodle("local_aicoursecreator_get_question_categories", {
+        courseid: args.courseid,
+      });
+    }
+
+    case "moodle_get_question_types": {
+      return await callMoodle("local_aicoursecreator_get_question_types", {
+        courseid: args.courseid,
+      });
+    }
+
+    case "moodle_create_question_category": {
+      return await callMoodle("local_aicoursecreator_create_question_category", {
+        courseid: args.courseid,
+        name:     args.name,
+        info:     args.info     || "",
+        parentid: args.parentid ?? 0,
+        idnumber: args.idnumber || "",
+      });
+    }
+
+    case "moodle_import_questions_xml": {
+      let xml = args.xml || "";
+      let filename = args.filename || "questions.xml";
+      if (!xml && args.xmlfile) {
+        if (!fs.existsSync(args.xmlfile)) {
+          throw new Error(`Moodle-XML-Datei nicht gefunden: ${args.xmlfile}`);
+        }
+        xml = fs.readFileSync(args.xmlfile, "utf8");
+        filename = args.filename || path.basename(args.xmlfile);
+      }
+      if (!xml) {
+        throw new Error("moodle_import_questions_xml benoetigt entweder xml oder xmlfile.");
+      }
+      return await callMoodle("local_aicoursecreator_import_questions_xml", {
+        courseid:   args.courseid,
+        categoryid: args.categoryid,
+        xml,
+        filename,
+      });
+    }
+
+    case "moodle_create_quiz": {
+      return await callMoodle("local_aicoursecreator_create_quiz", {
+        courseid:           args.courseid,
+        sectionnum:         args.sectionnum,
+        name:               args.name,
+        intro:              args.intro || "",
+        grade:              args.grade ?? 10,
+        questionsperpage:   args.questionsperpage ?? 1,
+        shuffleanswers:     args.shuffleanswers ?? 1,
+        preferredbehaviour: args.preferredbehaviour || "deferredfeedback",
+        visible:            args.visible ?? 1,
+      });
+    }
+
+    case "moodle_add_quiz_questions": {
+      const questionids = args.questionids || [];
+      return await callMoodle("local_aicoursecreator_add_quiz_questions", {
+        cmid:    args.cmid,
+        maxmark: args.maxmark ?? 1,
+        ...Object.fromEntries(questionids.map((id, i) => [`questionids[${i}]`, id])),
+      });
+    }
+
+    case "moodle_update_quiz": {
+      return await callMoodle("local_aicoursecreator_update_quiz", {
+        cmid:             args.cmid,
+        name:             args.name             ?? "",
+        intro:            args.intro            ?? "",
+        timelimit:        args.timelimit        ?? -1,
+        attempts:         args.attempts         ?? -1,
+        grademethod:      args.grademethod      ?? -1,
+        visible:          args.visible          ?? -1,
+        shuffleanswers:   args.shuffleanswers   ?? -1,
+        questionsperpage: args.questionsperpage ?? -1,
+      });
+    }
 
     case "moodle_update_label": {
       return await callMoodle("local_aicoursecreator_update_label", {
@@ -338,6 +632,24 @@ async function executeTool(name, args) {
       return await callMoodle("local_aicoursecreator_get_modules", {
         courseid:   args.courseid,
         sectionnum: args.sectionnum ?? -1,
+      });
+    }
+
+    case "moodle_get_assign_content": {
+      return await callMoodle("local_aicoursecreator_get_assign_content", {
+        cmid: args.cmid,
+      });
+    }
+
+    case "moodle_get_label_content": {
+      return await callMoodle("local_aicoursecreator_get_label_content", {
+        cmid: args.cmid,
+      });
+    }
+
+    case "moodle_get_page_content": {
+      return await callMoodle("local_aicoursecreator_get_page_content", {
+        cmid: args.cmid,
       });
     }
 
@@ -437,6 +749,16 @@ function send(obj) {
   process.stdout.write(JSON.stringify(obj) + "\n");
 }
 
+let pendingToolCalls = 0;
+let stdinEnded = false;
+
+function maybeExitAfterPendingWork() {
+  if (stdinEnded && pendingToolCalls === 0) {
+    process.exitCode = 0;
+    process.stdin.pause();
+  }
+}
+
 function handleRequest(req) {
   const { id, method, params } = req;
 
@@ -462,6 +784,7 @@ function handleRequest(req) {
   // tools/call
   if (method === "tools/call") {
     const { name, arguments: args } = params;
+    pendingToolCalls++;
     executeTool(name, args)
       .then(result => {
         send({
@@ -479,6 +802,10 @@ function handleRequest(req) {
             isError: true,
           },
         });
+      })
+      .finally(() => {
+        pendingToolCalls--;
+        maybeExitAfterPendingWork();
       });
     return;
   }
@@ -513,7 +840,10 @@ process.stdin.on("data", chunk => {
   }
 });
 
-process.stdin.on("end", () => process.exit(0));
+process.stdin.on("end", () => {
+  stdinEnded = true;
+  maybeExitAfterPendingWork();
+});
 process.stderr.write("Moodle MCP Server gestartet\n");
 
 // ── set_completion ──────────────────────────────────────────────────────────
