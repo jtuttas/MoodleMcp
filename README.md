@@ -66,7 +66,20 @@ Das Plugin `local_aicoursecreator` stellt die benötigten Webservice-Funktionen 
 > **Sicherheit:** Den Token wie ein Passwort behandeln. Niemals in
 > öffentliche Repositories oder Chats einfügen.
 
-### 4. moodle-mcp.js einrichten
+### 4. MCP-Server in Claude Desktop installieren
+
+#### Variante A: Ein-Klick-Installation (empfohlen)
+
+1. [`moodle-mcp.mcpb` herunterladen](https://github.com/jtuttas/MoodleMcp/releases/latest/download/moodle-mcp.mcpb)
+2. Datei doppelklicken oder in Claude Desktop unter **Einstellungen → Erweiterungen** hineinziehen
+3. **Moodle-URL** (ohne abschließenden `/`) und **API-Token** eintragen, Erweiterung aktivieren
+
+Node.js muss dafür nicht installiert sein – Claude Desktop bringt eine eigene Laufzeit mit.
+Der Token wird im Schlüsselbund des Betriebssystems gespeichert.
+
+#### Variante B: Manuelle Einrichtung
+
+**moodle-mcp.js einrichten**
 
 `moodle-mcp.js` auf den lokalen Rechner kopieren, z.B. nach:
 - Windows: `C:\moodle-mcp\moodle-mcp.js`
@@ -74,7 +87,7 @@ Das Plugin `local_aicoursecreator` stellt die benötigten Webservice-Funktionen 
 
 Keine weiteren Abhängigkeiten – nur Node.js wird benötigt.
 
-### 5. Claude Desktop konfigurieren
+**Claude Desktop konfigurieren**
 
 Konfigurationsdatei öffnen:
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
@@ -114,7 +127,7 @@ Auf macOS/Linux:
 }
 ```
 
-### 6. Claude Desktop neu starten
+### 5. Claude Desktop neu starten
 
 Claude Desktop vollständig beenden (auch aus dem System-Tray) und neu starten.
 Unten links das Hammer-Symbol prüfen – dort sollten die Moodle-Tools erscheinen.
@@ -241,6 +254,8 @@ Die `sectionnum` ist immer 0-basiert (Abschnitt 0 = allgemeiner Bereich).
 ```
 moodle-mcp/
 ├── moodle-mcp.js                  <- Lokaler MCP stdio Server
+├── manifest.json                  <- MCPB-Manifest (Ein-Klick-Installation)
+├── .github/workflows/release-mcpb.yml  <- baut moodle-mcp.mcpb bei jedem Release
 ├── README.md
 ├── SKILL.md                       <- Claude Skill (Lernsituationen automatisch aufbauen)
 └── Plugin/
@@ -259,6 +274,17 @@ moodle-mcp/
 | `Access denied` | Nutzer dem Dienst als autorisierte Person hinzufügen |
 | `Service not found` | Token prüfen; Dienst `AI Course Creator Service` aktiv? |
 | Aktivität im falschen Abschnitt | `sectionnum` ist 0-basiert: Abschnitt 1 = `sectionnum: 1` |
+
+---
+
+## Neues Release / MCPB bauen
+
+```bash
+git tag v1.0.1 && git push origin v1.0.1
+```
+
+Der Workflow übernimmt die Versionsnummer ins Manifest, baut `moodle-mcp.mcpb`,
+testet den Server und hängt die Datei an das GitHub-Release an.
 
 ---
 
