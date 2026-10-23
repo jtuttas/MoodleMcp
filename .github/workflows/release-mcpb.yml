@@ -1,0 +1,53 @@
+name: MCPB-Paket bauen
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Version aus Tag übernehmen
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          jq --arg v "$VERSION" '.version = $v' manifest.json > manifest.tmp && mv manifest.tmp manifest.json
+
+      - name: Manifest prüfen und Paket bauen
+        run: |
+          npx -y @anthropic-ai/mcpb validate manifest.json
+          npx -y @anthropic-ai/mcpb pack . moodle-mcp.mcpb
+
+      - name: Server-Smoke-Test (tools/list)
+        run: |
+          mkdir t && cd t && unzip -q ../moodle-mcp.mcpb
+          printf '%s\n' \
+            '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"ci","version":"1"}}}' \
+            '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
+          | MOODLE_URL=https://example.invalid MOODLE_TOKEN=x timeout 5 node moodle-mcp.js \
+          | grep -q '"moodle_get_sections"'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: moodle-mcp.mcpb
+          path: moodle-mcp.mcpb
+
+      - name: An Release anhängen
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 \
+            || gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes
+          gh release upload "$GITHUB_REF_NAME" moodle-mcp.mcpb --clobber

@@ -1,0 +1,7 @@
+# Nur Server, Manifest und Lizenz gehören ins MCPB-Paket
+.git/
+.github/
+Plugin/
+README.md
+SKILL.md
+*.mcpb
