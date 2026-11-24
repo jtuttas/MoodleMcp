@@ -66,7 +66,20 @@ Das Plugin `local_aicoursecreator` stellt die benötigten Webservice-Funktionen 
 > **Sicherheit:** Den Token wie ein Passwort behandeln. Niemals in
 > öffentliche Repositories oder Chats einfügen.
 
-### 4. moodle-mcp.js einrichten
+### 4. MCP-Server in Claude Desktop installieren
+
+#### Variante A: Ein-Klick-Installation (empfohlen)
+
+1. [`moodle-mcp.mcpb` herunterladen](https://github.com/jtuttas/MoodleMcp/releases/latest/download/moodle-mcp.mcpb)
+2. Datei doppelklicken oder in Claude Desktop unter **Einstellungen → Erweiterungen** hineinziehen
+3. **Moodle-URL** (ohne abschließenden `/`) und **API-Token** eintragen, Erweiterung aktivieren
+
+Node.js muss dafür nicht installiert sein – Claude Desktop bringt eine eigene Laufzeit mit.
+Der Token wird im Schlüsselbund des Betriebssystems gespeichert.
+
+#### Variante B: Manuelle Einrichtung
+
+**moodle-mcp.js einrichten**
 
 `moodle-mcp.js` auf den lokalen Rechner kopieren, z.B. nach:
 - Windows: `C:\moodle-mcp\moodle-mcp.js`
@@ -74,7 +87,7 @@ Das Plugin `local_aicoursecreator` stellt die benötigten Webservice-Funktionen 
 
 Keine weiteren Abhängigkeiten – nur Node.js wird benötigt.
 
-### 5. Claude Desktop konfigurieren
+**Claude Desktop konfigurieren**
 
 Konfigurationsdatei öffnen:
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
@@ -114,7 +127,7 @@ Auf macOS/Linux:
 }
 ```
 
-### 6. Claude Desktop neu starten
+### 5. Claude Desktop neu starten
 
 Claude Desktop vollständig beenden (auch aus dem System-Tray) und neu starten.
 Unten links das Hammer-Symbol prüfen – dort sollten die Moodle-Tools erscheinen.
@@ -125,8 +138,13 @@ Unten links das Hammer-Symbol prüfen – dort sollten die Moodle-Tools erschein
 
 | Tool | Beschreibung |
 |---|---|
+| `moodle_get_courses` | Kurse suchen/listen, wenn die Kurs-ID noch unbekannt ist |
 | `moodle_get_sections` | Alle Abschnitte eines Kurses lesen |
+| `moodle_create_section` | Kursabschnitt anlegen und optional benennen/beschreiben |
 | `moodle_get_modules` | Alle Aktivitäten eines Abschnitts mit cmid lesen |
+| `moodle_get_assign_content` | Gespeicherte HTML-Beschreibung und Metadaten einer Aufgabe rein lesend über die cmid abrufen |
+| `moodle_get_label_content` | Gespeicherten HTML-Inhalt und Metadaten eines Text- und Medienfelds rein lesend über die cmid abrufen |
+| `moodle_get_page_content` | Gespeicherten HTML-Inhalt und Metadaten einer Textseite rein lesend über die cmid abrufen |
 | `moodle_update_section` | Abschnittsname und Beschreibung setzen |
 | `moodle_create_label` | Text- und Medienfeld anlegen (Phasen-Header) |
 | `moodle_update_label` | Text- und Medienfeld bearbeiten |
@@ -139,6 +157,15 @@ Unten links das Hammer-Symbol prüfen – dort sollten die Moodle-Tools erschein
 | `moodle_upload_assignfile` | Datei als "Zusätzliche Datei" in eine Aufgabe hochladen |
 | `moodle_set_completion` | Abschlussverfolgung für eine Aktivität konfigurieren |
 | `moodle_set_restriction` | Aktivität sperren, bis andere Aktivitäten abgeschlossen sind |
+| `moodle_set_module_visibility` | Aktivität per cmid ein- oder ausblenden |
+| `moodle_delete_module` | Aktivität per cmid löschen |
+| `moodle_get_question_categories` | Fragenkategorien eines Kurses lesen |
+| `moodle_get_question_types` | Installierte/verfügbare Moodle-Fragetypen lesen |
+| `moodle_create_question_category` | Fragenkategorie in der Kurs-Fragensammlung anlegen |
+| `moodle_import_questions_xml` | Fragen aus Moodle-XML in eine Kategorie importieren |
+| `moodle_create_quiz` | Quiz-Aktivität in einem Kursabschnitt anlegen |
+| `moodle_add_quiz_questions` | Importierte/vorhandene Fragen einem Quiz hinzufügen |
+| `moodle_update_quiz` | Bestehendes Quiz bearbeiten |
 
 ### Sichtbarkeit (optional)
 
@@ -190,6 +217,12 @@ https://moodle.example.de/moodle/course/view.php?id=42
 **Abschnitte eines Kurses lesen:**
 > "Lies die Abschnitte von Kurs 42"
 
+**Kurs-ID suchen:**
+> "Suche Moodle-Kurse mit dem Namen ESP32"
+
+**Neuen Abschnitt anlegen:**
+> "Lege in Kurs 42 Abschnitt 3 als 'LS 7.3 - Sensorik' an und füge eine kurze HTML-Beschreibung hinzu."
+
 **Einen Abschnitt benennen:**
 > "Benenne Abschnitt 1 in Kurs 42 als 'LS 7.2 – ESP32 Webserver'"
 
@@ -211,6 +244,25 @@ https://moodle.example.de/moodle/course/view.php?id=42
 **Datei in eine Aufgabe hochladen:**
 > "Lies die Module in Abschnitt 2 von Kurs 42, finde die Aufgabe 'Arbeitsblatt' und lade die Datei `C:\\temp\\Arbeitsblatt.pdf` als zusätzliche Datei in diese Aufgabe hoch."
 > Hinweis: Für `moodle_upload_assignfile` muss der Pfad absolut sein und die Datei lokal existieren (Claude kann die Datei vorher lokal generieren).
+
+**Aktivität ein-/ausblenden oder löschen:**
+> "Lies die Module in Abschnitt 2 von Kurs 42 und verstecke die Aktivität 'Entwurf'."
+
+> "Lies die Module in Abschnitt 2 von Kurs 42 und lösche die irrtümlich erstellte Textseite 'Test'."
+
+**Fragen, Kategorien und Quizze:**
+> "Welche Fragetypen sind in Kurs 42 verfügbar?"
+
+> "Lege in Kurs 42 eine Fragenkategorie 'LF8 Docker Grundlagen' an."
+
+> "Importiere diese Moodle-XML-Fragen in die Kategorie 17 und erstelle daraus ein Quiz in Abschnitt 3."
+
+Der Fragenimport erwartet vollständiges Moodle-XML mit `<quiz>` als Root-Element.
+Für HTML-Inhalte in Fragen sollte CDATA verwendet werden. Jede Frage benötigt
+`<name><text>...</text></name>`. Das passt zum Arbeitsablauf des
+MoodleQuestionGenerator: erst valides Moodle-XML erzeugen, dann importieren und
+die zurückgegebenen `questionids` mit `moodle_add_quiz_questions` einem Quiz
+zuordnen.
 
 ---
 
@@ -241,6 +293,8 @@ Die `sectionnum` ist immer 0-basiert (Abschnitt 0 = allgemeiner Bereich).
 ```
 moodle-mcp/
 ├── moodle-mcp.js                  <- Lokaler MCP stdio Server
+├── manifest.json                  <- MCPB-Manifest (Ein-Klick-Installation)
+├── .github/workflows/release-mcpb.yml  <- baut moodle-mcp.mcpb bei jedem Release
 ├── README.md
 ├── SKILL.md                       <- Claude Skill (Lernsituationen automatisch aufbauen)
 └── Plugin/
@@ -259,6 +313,17 @@ moodle-mcp/
 | `Access denied` | Nutzer dem Dienst als autorisierte Person hinzufügen |
 | `Service not found` | Token prüfen; Dienst `AI Course Creator Service` aktiv? |
 | Aktivität im falschen Abschnitt | `sectionnum` ist 0-basiert: Abschnitt 1 = `sectionnum: 1` |
+
+---
+
+## Neues Release / MCPB bauen
+
+```bash
+git tag v1.0.1 && git push origin v1.0.1
+```
+
+Der Workflow übernimmt die Versionsnummer ins Manifest, baut `moodle-mcp.mcpb`,
+testet den Server und hängt die Datei an das GitHub-Release an.
 
 ---
 

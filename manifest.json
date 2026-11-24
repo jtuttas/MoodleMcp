@@ -1,0 +1,123 @@
+{
+  "manifest_version": "0.3",
+  "name": "moodle-mcp",
+  "display_name": "Moodle Kursaufbau (MMBbS)",
+  "version": "1.0.0",
+  "description": "Kursabschnitte, Textseiten, Labels, Aufgaben und Links in Moodle per Claude anlegen und bearbeiten.",
+  "long_description": "Verbindet Claude Desktop mit der Moodle REST API über das Plugin local_aicoursecreator. Voraussetzung: Plugin installiert, Webservices + REST aktiv, Token für den Dienst 'AI Course Creator Service'.",
+  "author": {
+    "name": "Dr. Jörg Tuttas",
+    "email": "tuttas@mmbbs.de",
+    "url": "https://github.com/jtuttas"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jtuttas/MoodleMcp"
+  },
+  "homepage": "https://github.com/jtuttas/MoodleMcp",
+  "license": "MIT",
+  "keywords": [
+    "moodle",
+    "lms",
+    "schule",
+    "kursaufbau"
+  ],
+  "server": {
+    "type": "node",
+    "entry_point": "moodle-mcp.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/moodle-mcp.js"
+      ],
+      "env": {
+        "MOODLE_URL": "${user_config.moodle_url}",
+        "MOODLE_TOKEN": "${user_config.moodle_token}"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "moodle_update_label",
+      "description": "Ändert den HTML-Inhalt und/oder Namen eines bestehenden Text- und Medienfelds (mod_label)."
+    },
+    {
+      "name": "moodle_update_url",
+      "description": "Ändert Name und/oder Ziel-URL eines bestehenden externen Links (mod_url)."
+    },
+    {
+      "name": "moodle_get_modules",
+      "description": "Gibt alle Aktivitäten eines Kurses oder Abschnitts zurück – mit cmid, Typ und Name. Verwenden um cmids für Update-Aufrufe zu ermitteln."
+    },
+    {
+      "name": "moodle_update_page",
+      "description": "Ändert Titel und/oder HTML-Inhalt einer bestehenden Textseite (mod_page). Benötigt die cmid (aus moodle_get_modules oder dem Rückgabewert von moodle_create_page)."
+    },
+    {
+      "name": "moodle_update_assign",
+      "description": "Ändert Titel, Beschreibung und/oder Abgabedatum einer bestehenden Aufgabe (mod_assign). Benötigt die cmid."
+    },
+    {
+      "name": "moodle_upload_assignfile",
+      "description": "Laedt eine lokal gespeicherte Datei (PDF, DOCX, XLSX, PPTX, HTML, PNG, JPG usw.) als 'Zusaetzliche Datei' in eine Moodle-Aufgabe hoch. Claude generiert die Datei zuerst lokal, dann wird sie per Base64 an Moodle uebertragen. Unterstuetzt alle gaengigen Dateiformate."
+    },
+    {
+      "name": "moodle_set_completion",
+      "description": "Aktiviert die Abschlussverfolgung fuer eine Aktivitaet. completion=1: SuS klickt manuell 'Abgeschlossen'. completion=2+completionsubmit=1: automatisch bei Einreichung (nur Aufgaben). Muss vor moodle_set_restriction aufgerufen werden."
+    },
+    {
+      "name": "moodle_set_restriction",
+      "description": "Sperrt eine Aktivitaet bis bestimmte andere Aktivitaeten abgeschlossen sind. Die Voraussetzungs-Aktivitaeten muessen vorher mit moodle_set_completion konfiguriert worden sein. Mehrere cmids werden per AND oder OR verknuepft."
+    },
+    {
+      "name": "moodle_get_sections",
+      "description": "Gibt alle Abschnitte eines Moodle-Kurses zurück (Name, Nummer, ID)."
+    },
+    {
+      "name": "moodle_update_section",
+      "description": "Setzt Name und Beschreibung (HTML) eines Kursabschnitts."
+    },
+    {
+      "name": "moodle_create_page",
+      "description": "Erstellt eine Textseite (mod_page) in einem Kursabschnitt. NUR für Inhalte die Schüler nur LESEN (Infoblätter, Leitfäden, Phasen-Header)."
+    },
+    {
+      "name": "moodle_create_label",
+      "description": "Erstellt ein Text- und Medienfeld (mod_label) – wird direkt auf der Kursseite angezeigt. Ideal für farbige Phasen-Header (Phase 1 Informieren, Phase 2 Planen usw.)."
+    },
+    {
+      "name": "moodle_create_url",
+      "description": "Erstellt einen Link zu einer externen Webseite (mod_url) in einem Kursabschnitt. Für Dokumentationen, GitHub-Repos, MDN, Arduino-Referenzen usw."
+    },
+    {
+      "name": "moodle_create_assign",
+      "description": "Erstellt eine Aufgabe (mod_assign) in einem Kursabschnitt. Verwenden wenn Schüler etwas abgeben/ausfüllen sollen (Arbeitsblätter, Reflexionen, Checklisten)."
+    }
+  ],
+  "tools_generated": false,
+  "user_config": {
+    "moodle_url": {
+      "type": "string",
+      "title": "Moodle-URL",
+      "description": "Basis-URL des Moodle ohne abschließenden Slash, z. B. https://moodle.mm-bbs.de",
+      "required": true
+    },
+    "moodle_token": {
+      "type": "string",
+      "title": "API-Token",
+      "description": "Webservice-Token für den Dienst 'AI Course Creator Service'",
+      "sensitive": true,
+      "required": true
+    }
+  },
+  "compatibility": {
+    "platforms": [
+      "win32",
+      "darwin",
+      "linux"
+    ],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  }
+}
