@@ -159,6 +159,7 @@ Unten links das Hammer-Symbol prüfen – dort sollten die Moodle-Tools erschein
 | `moodle_set_restriction` | Aktivität sperren, bis andere Aktivitäten abgeschlossen sind |
 | `moodle_set_module_visibility` | Aktivität per cmid ein- oder ausblenden |
 | `moodle_delete_module` | Aktivität per cmid löschen |
+| `moodle_move_module` | Aktivität per cmid verschieben (Reihenfolge oder anderer Abschnitt) |
 | `moodle_get_question_categories` | Fragenkategorien eines Kurses lesen |
 | `moodle_get_question_types` | Installierte/verfügbare Moodle-Fragetypen lesen |
 | `moodle_create_question_category` | Fragenkategorie in der Kurs-Fragensammlung anlegen |

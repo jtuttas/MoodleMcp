@@ -100,6 +100,19 @@ const TOOLS = [
     },
   },
   {
+    name: "moodle_move_module",
+    description: "Verschiebt eine bestehende Moodle-Aktivität (per cmid) innerhalb ihres Abschnitts oder in einen anderen Abschnitt. Ohne beforecmid landet sie am Ende des Ziel-Abschnitts. cmids vorher mit moodle_get_modules ermitteln.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        cmid:       { type: "number", description: "Course Module ID der zu verschiebenden Aktivität" },
+        sectionnum: { type: "number", description: "Ziel-Abschnittsnummer (0-basiert). -1 = im aktuellen Abschnitt bleiben, nur Reihenfolge ändern", default: -1 },
+        beforecmid: { type: "number", description: "cmid der Aktivität, vor der eingefügt werden soll. 0 = ans Ende des Abschnitts", default: 0 },
+      },
+      required: ["cmid"],
+    },
+  },
+  {
     name: "moodle_get_question_categories",
     description: "Listet die Fragenkategorien der Fragensammlung eines Kurses. Vor dem Import von Moodle-XML-Fragen verwenden.",
     inputSchema: {
@@ -467,6 +480,14 @@ async function executeTool(name, args) {
     case "moodle_delete_module": {
       return await callMoodle("local_aicoursecreator_delete_module", {
         cmid: args.cmid,
+      });
+    }
+
+    case "moodle_move_module": {
+      return await callMoodle("local_aicoursecreator_move_module", {
+        cmid:       args.cmid,
+        sectionnum: args.sectionnum ?? -1,
+        beforecmid: args.beforecmid ?? 0,
       });
     }
 

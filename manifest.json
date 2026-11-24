@@ -50,6 +50,10 @@
       "description": "Gibt alle Aktivitäten eines Kurses oder Abschnitts zurück – mit cmid, Typ und Name. Verwenden um cmids für Update-Aufrufe zu ermitteln."
     },
     {
+      "name": "moodle_move_module",
+      "description": "Verschiebt eine Aktivität (per cmid) innerhalb ihres Abschnitts oder in einen anderen Abschnitt."
+    },
+    {
       "name": "moodle_update_page",
       "description": "Ändert Titel und/oder HTML-Inhalt einer bestehenden Textseite (mod_page). Benötigt die cmid (aus moodle_get_modules oder dem Rückgabewert von moodle_create_page)."
     },
