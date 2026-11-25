@@ -38,6 +38,54 @@
   },
   "tools": [
     {
+      "name": "moodle_get_courses",
+      "description": "Sucht und listet Moodle-Kurse, auf die der Webservice-Nutzer Zugriff hat. Hilfreich, wenn die Kurs-ID noch unbekannt ist."
+    },
+    {
+      "name": "moodle_create_section",
+      "description": "Legt einen Kursabschnitt bis zur angegebenen Abschnittsnummer an und setzt optional Name, HTML-Beschreibung und Sichtbarkeit."
+    },
+    {
+      "name": "moodle_set_module_visibility",
+      "description": "Blendet eine bestehende Moodle-Aktivität anhand ihrer cmid ein oder aus."
+    },
+    {
+      "name": "moodle_delete_module",
+      "description": "Löscht eine bestehende Moodle-Aktivität anhand ihrer cmid. Vorher moodle_get_modules verwenden, um die richtige cmid zu prüfen."
+    },
+    {
+      "name": "moodle_move_module",
+      "description": "Verschiebt eine bestehende Moodle-Aktivität (per cmid) innerhalb ihres Abschnitts oder in einen anderen Abschnitt. Ohne beforecmid landet sie am Ende des Ziel-Abschnitts. cmids vorher mit moodle_get_modules ermitteln."
+    },
+    {
+      "name": "moodle_get_question_categories",
+      "description": "Listet die Fragenkategorien der Fragensammlung eines Kurses. Vor dem Import von Moodle-XML-Fragen verwenden."
+    },
+    {
+      "name": "moodle_get_question_types",
+      "description": "Listet die in Moodle installierten Fragetypen, die fuer Moodle-XML-Importe verwendet werden koennen, z.B. multichoice, cloze, ddwtos oder coderunner."
+    },
+    {
+      "name": "moodle_create_question_category",
+      "description": "Erstellt eine Fragenkategorie in der Fragensammlung eines Kurses. Danach Moodle-XML-Fragen in diese Kategorie importieren."
+    },
+    {
+      "name": "moodle_import_questions_xml",
+      "description": "Importiert Fragen im Moodle-XML-Format in eine Fragenkategorie. Erwartet vollstaendiges Moodle XML mit <quiz>-Root, <question>-Eintraegen, <name><text>...</text></name> und CDATA fuer HTML, kompatibel zu MoodleQuestionGenerator."
+    },
+    {
+      "name": "moodle_create_quiz",
+      "description": "Erstellt ein Quiz (mod_quiz) in einem Kursabschnitt. Fragen werden danach mit moodle_add_quiz_questions hinzugefuegt."
+    },
+    {
+      "name": "moodle_add_quiz_questions",
+      "description": "Fuegt vorhandene Fragen aus der Fragensammlung anhand ihrer questionids einem Quiz hinzu. questionids kommen z.B. aus moodle_import_questions_xml."
+    },
+    {
+      "name": "moodle_update_quiz",
+      "description": "Aktualisiert Eigenschaften eines bestehenden Quiz (Name, Intro, Zeitlimit, Versuche, Bewertungsmethode, Sichtbarkeit). Nur angegebene Felder werden geaendert."
+    },
+    {
       "name": "moodle_update_label",
       "description": "Ändert den HTML-Inhalt und/oder Namen eines bestehenden Text- und Medienfelds (mod_label)."
     },
@@ -50,8 +98,16 @@
       "description": "Gibt alle Aktivitäten eines Kurses oder Abschnitts zurück – mit cmid, Typ und Name. Verwenden um cmids für Update-Aufrufe zu ermitteln."
     },
     {
-      "name": "moodle_move_module",
-      "description": "Verschiebt eine Aktivität (per cmid) innerhalb ihres Abschnitts oder in einen anderen Abschnitt."
+      "name": "moodle_get_assign_content",
+      "description": "Liest die unveränderte gespeicherte HTML-Beschreibung und Metadaten einer bestehenden Moodle-Aufgabe anhand ihrer cmid. Rein lesend; verändert keine Moodle-Daten."
+    },
+    {
+      "name": "moodle_get_label_content",
+      "description": "Liest den unveränderten gespeicherten HTML-Inhalt und die Metadaten eines bestehenden Text- und Medienfelds anhand seiner cmid. Rein lesend; verändert keine Moodle-Daten."
+    },
+    {
+      "name": "moodle_get_page_content",
+      "description": "Liest den unveränderten gespeicherten HTML-Inhalt und die Metadaten einer bestehenden Moodle-Textseite anhand ihrer cmid. Rein lesend; verändert keine Moodle-Daten."
     },
     {
       "name": "moodle_update_page",
@@ -75,11 +131,11 @@
     },
     {
       "name": "moodle_get_sections",
-      "description": "Gibt alle Abschnitte eines Moodle-Kurses zurück (Name, Nummer, ID)."
+      "description": "Gibt alle Abschnitte eines Moodle-Kurses zurück (Nummer, ID, Name, Sichtbarkeit und Beschreibung als HTML)."
     },
     {
       "name": "moodle_update_section",
-      "description": "Setzt Name und Beschreibung (HTML) eines Kursabschnitts."
+      "description": "Ändert Name, Beschreibung (HTML) und/oder Sichtbarkeit eines Kursabschnitts. Nicht angegebene Felder bleiben unverändert."
     },
     {
       "name": "moodle_create_page",

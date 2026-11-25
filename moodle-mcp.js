@@ -360,7 +360,7 @@ const TOOLS = [
   },
   {
     name: "moodle_get_sections",
-    description: "Gibt alle Abschnitte eines Moodle-Kurses zurück (Name, Nummer, ID).",
+    description: "Gibt alle Abschnitte eines Moodle-Kurses zurück (Nummer, ID, Name, Sichtbarkeit und Beschreibung als HTML).",
     inputSchema: {
       type: "object",
       properties: {
@@ -371,16 +371,17 @@ const TOOLS = [
   },
   {
     name: "moodle_update_section",
-    description: "Setzt Name und Beschreibung (HTML) eines Kursabschnitts.",
+    description: "Ändert Name, Beschreibung (HTML) und/oder Sichtbarkeit eines Kursabschnitts. Nicht angegebene Felder bleiben unverändert.",
     inputSchema: {
       type: "object",
       properties: {
         courseid:   { type: "number", description: "Kurs-ID" },
         sectionnum: { type: "number", description: "Abschnittsnummer (0-basiert)" },
-        name:       { type: "string", description: "Name des Abschnitts, z.B. 'LS 7.2 – ESP32 Webserver'" },
-        summary:    { type: "string", description: "HTML-Inhalt der Abschnittsbeschreibung (Handlungssituation-Card)" },
+        name:       { type: "string", description: "Name des Abschnitts, z.B. 'LS 7.2 – ESP32 Webserver' (weglassen = nicht ändern)" },
+        summary:    { type: "string", description: "HTML-Inhalt der Abschnittsbeschreibung, z.B. Handlungssituation-Card (weglassen = nicht ändern)" },
+        visible:    { type: "number", description: "1 = sichtbar, 0 = versteckt, -1 = nicht ändern", default: -1 },
       },
-      required: ["courseid", "sectionnum", "name"],
+      required: ["courseid", "sectionnum"],
     },
   },
   {
@@ -440,7 +441,9 @@ const TOOLS = [
         name:         { type: "string", description: "Titel der Aufgabe" },
         description:  { type: "string", description: "HTML-Beschreibung der Aufgabe" },
         duedate:      { type: "number", description: "Abgabedatum als Unix-Timestamp (0 = kein Datum)", default: 0 },
+        allowsubmissionsfromdate: { type: "number", description: "Abgabe möglich ab (Unix-Timestamp, 0 = sofort)", default: 0 },
         maxfiles:     { type: "number", description: "Max. Datei-Uploads (1 = Standard, 0 = kein Upload)", default: 1 },
+        submissiondrafts: { type: "number", description: "1 = SuS müssen 'Abgeben' klicken (Entwurfsmodus), 0 = Upload gilt sofort als abgegeben", default: 0 },
         visible:      { type: "number", description: "1 = sichtbar (Standard), 0 = versteckt", default: 1 },
       },
       required: ["courseid", "sectionnum", "name"],
@@ -702,16 +705,28 @@ async function executeTool(name, args) {
         id: s.id,
         name: s.name || `(Abschnitt ${s.sectionnum})`,
         visible: s.visible,
+        summary: s.summary || "",
       }));
     }
 
     case "moodle_update_section": {
+      // Das Plugin überschreibt immer name, summary und visible. Damit nicht
+      // angegebene Felder erhalten bleiben (wie bei den anderen Update-Tools),
+      // wird der aktuelle Stand vorher gelesen.
+      const sections = await callMoodle("local_aicoursecreator_get_sections", {
+        courseid: args.courseid,
+      });
+      const current = sections.find(s => s.sectionnum === args.sectionnum);
+      if (!current) {
+        throw new Error(`Abschnitt ${args.sectionnum} in Kurs ${args.courseid} nicht gefunden.`);
+      }
+      const visible = (args.visible === undefined || args.visible === -1) ? current.visible : args.visible;
       return await callMoodle("local_aicoursecreator_update_section", {
         courseid:   args.courseid,
         sectionnum: args.sectionnum,
-        name:       args.name       || "",
-        summary:    args.summary    || "",
-        visible:    args.visible    ?? 1,
+        name:       args.name    ?? current.name    ?? "",
+        summary:    args.summary ?? current.summary ?? "",
+        visible,
       });
     }
 
@@ -753,7 +768,9 @@ async function executeTool(name, args) {
         name:        args.name,
         description: args.description || "",
         duedate:     args.duedate     || 0,
+        allowsubmissionsfromdate: args.allowsubmissionsfromdate || 0,
         maxfiles:    args.maxfiles    ?? 1,
+        submissiondrafts: args.submissiondrafts ?? 0,
         visible:     args.visible     ?? 1,
       });
     }

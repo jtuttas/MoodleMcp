@@ -139,20 +139,20 @@ Unten links das Hammer-Symbol prüfen – dort sollten die Moodle-Tools erschein
 | Tool | Beschreibung |
 |---|---|
 | `moodle_get_courses` | Kurse suchen/listen, wenn die Kurs-ID noch unbekannt ist |
-| `moodle_get_sections` | Alle Abschnitte eines Kurses lesen |
+| `moodle_get_sections` | Alle Abschnitte eines Kurses lesen (inkl. Sichtbarkeit und Beschreibung als HTML) |
 | `moodle_create_section` | Kursabschnitt anlegen und optional benennen/beschreiben |
 | `moodle_get_modules` | Alle Aktivitäten eines Abschnitts mit cmid lesen |
 | `moodle_get_assign_content` | Gespeicherte HTML-Beschreibung und Metadaten einer Aufgabe rein lesend über die cmid abrufen |
 | `moodle_get_label_content` | Gespeicherten HTML-Inhalt und Metadaten eines Text- und Medienfelds rein lesend über die cmid abrufen |
 | `moodle_get_page_content` | Gespeicherten HTML-Inhalt und Metadaten einer Textseite rein lesend über die cmid abrufen |
-| `moodle_update_section` | Abschnittsname und Beschreibung setzen |
+| `moodle_update_section` | Abschnittsname, Beschreibung und/oder Sichtbarkeit ändern (nicht angegebene Felder bleiben erhalten) |
 | `moodle_create_label` | Text- und Medienfeld anlegen (Phasen-Header) |
 | `moodle_update_label` | Text- und Medienfeld bearbeiten |
 | `moodle_create_page` | Textseite anlegen |
 | `moodle_update_page` | Textseite bearbeiten |
 | `moodle_create_url` | Externen Link anlegen |
 | `moodle_update_url` | Externen Link bearbeiten |
-| `moodle_create_assign` | Aufgabe anlegen |
+| `moodle_create_assign` | Aufgabe anlegen (optional mit Abgabebeginn und Entwurfsmodus) |
 | `moodle_update_assign` | Aufgabe bearbeiten |
 | `moodle_upload_assignfile` | Datei als "Zusätzliche Datei" in eine Aufgabe hochladen |
 | `moodle_set_completion` | Abschlussverfolgung für eine Aktivität konfigurieren |
@@ -275,7 +275,9 @@ Emojis im `name`-Feld führen zu einem Datenbankfehler. Im HTML-Inhalt funktioni
 Emojis problemlos als HTML-Entities, z.B. `&#127757;` statt 🌍.
 
 **Sichtbarkeit von Abschnitten**
-`update_section` setzt Sichtbarkeit auf Abschnittsebene. Die Sichtbarkeit einzelner
+`moodle_update_section` setzt die Sichtbarkeit auf Abschnittsebene (`visible`, `-1` = nicht ändern).
+Das Plugin überschreibt dabei immer Name, Beschreibung und Sichtbarkeit; der MCP-Server liest
+deshalb vorher den aktuellen Stand und übernimmt nicht angegebene Felder. Die Sichtbarkeit einzelner
 Aktivitäten wird über den `visible`-Parameter der jeweiligen Create/Update-Funktion
 gesteuert.
 
